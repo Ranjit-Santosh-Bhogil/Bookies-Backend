@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/bookies";
 
 const SAMPLE_UNIVERSITIES = [
-  "MIT",
+  "DIT",
   "Stanford University",
   "Harvard University",
   "Oxford University",
