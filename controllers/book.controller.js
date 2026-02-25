@@ -1,6 +1,13 @@
 import Book from "../models/book.model.js";
 import mongoose from "mongoose";
 
+const getBaseUrl = (req) => {
+  if (process.env.PUBLIC_BASE_URL) return process.env.PUBLIC_BASE_URL.replace(/\/$/, "");
+  const protocol = req.protocol;
+  const host = req.get("host");
+  return `${protocol}://${host}`;
+};
+
 export const addBook = async (req, res) => {
   try {
     const { title, author, subject, condition, description } = req.body;
@@ -8,7 +15,11 @@ export const addBook = async (req, res) => {
       return res.status(400).json({ message: "Title, author and subject are required." });
     }
     const university = req.user.university;
-    const image = req.file ? `/uploads/${req.file.filename}` : "";
+    let image = "";
+    if (req.file) {
+      const baseUrl = getBaseUrl(req);
+      image = `${baseUrl}/uploads/${req.file.filename}`;
+    }
     const book = new Book({
       title: title.trim(),
       author: author.trim(),
@@ -38,7 +49,10 @@ export const editBook = async (req, res) => {
     if (subject !== undefined) book.subject = subject.trim();
     if (condition !== undefined) book.condition = condition;
     if (description !== undefined) book.description = description.trim();
-    if (req.file) book.image = `/uploads/${req.file.filename}`;
+    if (req.file) {
+      const baseUrl = getBaseUrl(req);
+      book.image = `${baseUrl}/uploads/${req.file.filename}`;
+    }
     book.updatedAt = new Date();
     await book.save();
     const populated = await Book.findById(book._id).populate("owner", "name email university");
